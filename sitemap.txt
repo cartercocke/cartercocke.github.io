@@ -1,7 +1,6 @@
-https://cartercocke.github.io/
-https://cartercocke.github.io/index/
-https://cartercocke.github.io/research/
-https://cartercocke.github.io/afrl_challenge/
-https://cartercocke.github.io/heatsink_competition/
-https://cartercocke.github.io/keyboard_design/
-https://cartercocke.github.io/cv/
+https://cartercocke.github.io/index.html
+https://cartercocke.github.io/research.html
+https://cartercocke.github.io/afrl_challenge.html
+https://cartercocke.github.io/heatsink_competition.html
+https://cartercocke.github.io/keyboard_design.html
+https://cartercocke.github.io/cv.html
