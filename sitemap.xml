@@ -43,4 +43,9 @@
       <changefreq>monthly</changefreq>
    </url>
 
+   <url>
+      <loc>https://cartercocke.github.io/fea_project</loc>
+      <changefreq>monthly</changefreq>
+   </url>
+
 </urlset>
