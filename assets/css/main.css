@@ -3393,11 +3393,21 @@ input, select, textarea {
 	}
 
 		#banner .inner {
-			margin: 0 auto;
-			width: 55em;
+			padding: 0 5% 0 5%;
+			display: flex;
+			align-items: center; /* Vertically center align items */
 		}
-
-		#banner .logo {
+		
+		#banner .inner .image-container {
+			margin-right: 5%;
+		}
+		
+		#banner .inner .image-container img {
+			width: 18em;
+			border-radius: 50%;
+		}
+		
+		#banner img {
 			-moz-transition: opacity 2s ease, -moz-transform 1s ease;
 			-webkit-transition: opacity 2s ease, -webkit-transform 1s ease;
 			-ms-transition: opacity 2s ease, -ms-transform 1s ease;
@@ -3407,20 +3417,7 @@ input, select, textarea {
 			-ms-transform: translateY(0);
 			transform: translateY(0);
 			opacity: 1;
-			margin: 0 0 1.3em 0;
 		}
-
-			#banner .logo .icon {
-				border-radius: 100%;
-				border: solid 2px rgba(255, 255, 255, 0.125);
-				cursor: default;
-				display: inline-block;
-				font-size: 2em;
-				height: 2.25em;
-				line-height: 2.25em;
-				text-align: center;
-				width: 2.25em;
-			}
 
 		#banner h2 {
 			-moz-transition: opacity 0.5s ease, -moz-transform 0.5s ease, -moz-filter 0.25s ease;
@@ -3525,7 +3522,7 @@ input, select, textarea {
 
 		}
 
-		body.is-preload #banner .logo {
+		body.is-preload #banner img {
 			-moz-transform: translateY(0.5em);
 			-webkit-transform: translateY(0.5em);
 			-ms-transform: translateY(0.5em);
