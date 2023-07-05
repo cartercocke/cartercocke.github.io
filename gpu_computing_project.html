@@ -1,0 +1,153 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Solving the heat equation with FFTs on the GPU - Carter Cocke Portfolio</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<script type="text/javascript" id="MathJax-script" async
+			src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+		</script>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Carter Cocke Portfolio</a></h1>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menu</h2>
+							<ul class="links">
+								<li><a href="index.html">Home</a></li>
+								<li><a href="cv.html">Curriculum Vitae</a></li>
+								<li><a href="projects.html">Projects</a></li>
+							</ul>
+							<a href="#" class="close">Close</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>Solving the anisotropic heat equation with fast Fourier transforms on the GPU</h2>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<h3 class="major">Overview</h3>
+
+									<p>
+										The goal of this project was to solve the anisotropic heat equation using fast Fourier transforms (FFTs) using a graphics processing unit (GPU). The heat equation is a parabolic partial differential equation with the following form:
+
+										$$\rho c_p \frac{\partial T(\boldsymbol{x})}{\partial t} = \nabla \cdot (k(\boldsymbol x) \nabla T(\boldsymbol x)) + \dot{q}_\mathrm{V}(\boldsymbol x),$$
+
+										where \(T\) is the temperature, \(\boldsymbol{x}\) is the spatial position, \(\rho\) is the density, \(c_p\) is the specific heat capacity, \(k\) is the thermal conductivity, and \(\dot{q}_\mathrm{V}\) is the volumetric heat source.
+										The main idea behind solving the heat equation with FFTs is that derivatives in real space become a multiplication by the spatial frequency in Fourier space. We leverage this to compute all the spatial derivatives required for the operators \(\nabla^2 T(\boldsymbol x)\) (homogeneous case) and/or \(\nabla \cdot (k(\boldsymbol x) \nabla T(\boldsymbol x))\) (heterogeneous case) that appears in the heat equation. Once we compute these, the problem becomes a simple ODE that we can integrate using any time-integration technique, of which we use forward Euler and 4th-order Runge-Kutta.
+										
+										At the core of the program, we are simply just performing FFTs, IFFTs, and local point-wise operations in the correct sequence to compute the right-hand side of the heat equation. In the case of heterogeneous materials properties where \(k\) varies in space, the solution is more complicated and takes the following form:								
+										
+										$$\rho c_p \frac{\partial T(\boldsymbol x)}{\partial t} = \mathcal{F}^{-1}\Bigl[i \boldsymbol \xi \cdot \mathcal{F}\bigl(k(\boldsymbol x) \mathcal{F}^{-1}[i \boldsymbol \xi \mathcal{F}(T(\boldsymbol x))]\bigr)\Bigr] + \dot{q}_\mathrm{V}(\boldsymbol x),$$
+
+										where \(\mathcal F\) denotes a Fourier transform, \(\mathcal F^{-1}\) denotes an inverse Fourier transform, and \(\boldsymbol \xi\) is the spatial frequency vector.
+
+										In the case that \(k\) is constant, the solution is simpler, easier, and faster to compute than the heterogeneous case:
+
+										$$\frac{\partial T(\boldsymbol x)}{\partial t} = \frac{\dot{q}_\mathrm{V}(\boldsymbol x)}{\rho c_p} - \frac{k}{\rho c_p} \mathcal{F}^{-1}\Bigl[\|\boldsymbol \xi\|^2_2 \widehat{T}\Bigr](\boldsymbol x),$$
+
+										where \(\widehat{T}\) denotes the Fourier transform of \(T\). Once we evaluate the right-hand side of the above equations, we are left with a simple ODE that we can solve with any numerical integration method. Here we use the explicit Euler or explicit 4th-order Runge-Kutta methods. For explicit Euler integration with an isotropic conductivity field, we compute the temperature at time step \(n+1\) as follows:
+
+										$$T^{(n+1)}(\boldsymbol x) = T^{(n)}(\boldsymbol x) + \left[\frac{\dot{q}_\mathrm{V}(\boldsymbol x)}{\rho c_p} - k\mathcal{F}^{-1}\Bigl[\|\boldsymbol \xi\|^2_2 \widehat{T}^{(n)}\Bigr](\boldsymbol x)\right] \frac{\Delta t}{\rho c_p}.$$
+
+										The extension for the 4th-order Runge-Kutta method or for anisotropic conductivity fields is similar. This general solution method using FFTs is less flexible than finite-difference methods as periodic boundary conditions are <em>strictly</em> enforced, but is much faster as a result.
+
+									</p>	
+
+									<h3 class="major">Implementation</h3>
+									<p>
+										The implementation of the above is done in CUDA and C++ using the highly optimized FFTW and cufft libaries, for the CPU and GPU, respectively.
+										An example simulation from the code is shown below on a \(256 \times 256\) grid with a heterogeneous thermal conductivity field \(k(\boldsymbol x)\):
+										<center><img src="files/gpu_computing/heat_equation_example.gif" alt="file unavailable"/></center>
+									</p>	
+									
+									<h3 class="major">Code</h3>
+									
+									<p>
+										<p>
+											The code is publicly available on GitHub and is written in C++ and CUDA. 
+											Both a CPU and GPU version are provided, and plotting is performed externally in Python.
+
+											<br>
+											<a href="https://github.com/cartercocke/Heat-Equation-FFT-GPU" target="_blank">
+												https://github.com/cartercocke/Heat-Equation-FFT-GPU
+											</a>
+										</p>
+									</p>
+									
+
+									<h3 class="major">Other Projects</h3>
+
+									<section class="features">
+										<article>
+											<a href="afrl_challenge.html" class="image"><img src="files/afrl_challenge/afrl_challenge_example.png" alt="file unavailable" /></a>
+											<h3 class="major">AFRL Challenge</h3>
+											<p>A research challenge in which my team won the top performer award for most accurate microscale structure-to-properties predictions</p>
+											<a href="afrl_challenge.html" class="special">Learn more</a>
+										</article>
+										<article>
+											<a href="heatsink_competition.html" class="image"><img src="files/heatsink_competition/heatsink_render_thumnail.png" alt="file unavailable" /></a>
+											<h3 class="major">Heat Sink Design Challenge</h3>
+											<p>My team's competition-winning natural convection heat sink design for the 2021 ASME/IEEE Heat Sink Design Challenge</p>
+											<a href="heatsink_competition.html" class="special">Learn more</a>
+										</article>
+									</section>
+									<ul class="actions">
+										<li><a href="projects.html" class="button">Browse All</a></li>
+									</ul>
+
+								</div>
+							</div>
+
+					</section>
+
+				<!-- Footer -->
+				<section id="footer">
+					<div class="inner">
+						<ul class="copyright">
+							<li>&copy; Carter Cocke</li>
+							<li><a href="https://www.linkedin.com/in/cartercocke/" target="_blank">LinkedIn <i class="fab fa-linkedin"></i></a></li>
+							<li><a href="https://github.com/cartercocke" target="_blank">GitHub <i class="fab fa-github"></i></a></li>
+							<li><a href="https://scholar.google.com/citations?user=UtxXZCAAAAAJ&hl=en" target="_blank">Google Scholar <i class="fab fa-google"></i></a></li>
+							<li><a href="https://www.researchgate.net/profile/Carter-Cocke" target="_blank">ResearchGate <i class="fab fa-researchgate"></i></a></li>
+							<li><a href="https://orcid.org/0000-0001-5929-7759" target="_blank">ORCiD <i class="fab fa-orcid"></i></a></li>
+							<li>Design: HTML5 UP</li>
+						</ul>
+					</div>
+				</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
